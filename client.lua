@@ -34,14 +34,14 @@ Citizen.CreateThread(function()
     while true do
         local ped = PlayerPedId()
         local closestVehicle = QBCore.Functions.GetClosestVehicle()
-        --local Distance = ?????????
+        local Distance = #(GetEntityCoords(ped)-GetEntityCoords(closestVehicle))
         local vehicleCoords = GetEntityCoords(closestVehicle)
         local dimension = GetModelDimensions(GetEntityModel(closestVehicle), First, Second)
         if DoesEntityExist(closestVehicle) and IsEntityAVehicle(closestVehicle) and not IsPedInAnyVehicle(ped, false) and #(GetEntityCoords(closestVehicle) - GetEntityCoords(PlayerPedId())) < 5.0 then
             Vehicle.Coords = vehicleCoords
             Vehicle.Dimensions = dimension
             Vehicle.Vehicle = closestVehicle
-            --Vehicle.Distance = Distance
+            Vehicle.Distance = Distance
             if GetDistanceBetweenCoords(GetEntityCoords(closestVehicle) + GetEntityForwardVector(closestVehicle), GetEntityCoords(ped), true) > GetDistanceBetweenCoords(GetEntityCoords(closestVehicle) + GetEntityForwardVector(closestVehicle) * -1, GetEntityCoords(ped), true) then
                 Vehicle.IsInFront = false
             else
