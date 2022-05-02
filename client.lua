@@ -13,34 +13,33 @@ local Keys = {
 local First = vector3(0.0, 0.0, 0.0)
 local Second = vector3(5.0, 5.0, 5.0)
 
-local Vehicle = {}
+local Vehicle = {Coords = nil, Vehicle = nil, Dimension = nil, IsInFront = false, Distance = nil}
 
 Citizen.CreateThread(function()
+    Citizen.Wait(200)
     while true do
         local ped = PlayerPedId()
-        local closestVehicle = QBCore.Functions.GetClosestVehicle()
+        local closestVehicle, Distance = QBCore.Functions.GetClosestVehicle()
         local vehicleCoords = GetEntityCoords(closestVehicle)
+        local vehicleForwardVector =  GetEntityForwardVector(closestVehicle)
         local dimension = GetModelDimensions(GetEntityModel(closestVehicle), First, Second)
-        if DoesEntityExist(closestVehicle) and IsEntityAVehicle(closestVehicle) and not IsPedInAnyVehicle(ped, false) and #(GetEntityCoords(closestVehicle) - GetEntityCoords(ped)) < 5.0 then
+        if Distance < 6.0 and (DoesEntityExist(closestVehicle) and IsEntityAVehicle(closestVehicle)) and not IsPedInAnyVehicle(ped, false) then
             Vehicle.Coords = vehicleCoords
             Vehicle.Dimensions = dimension
             Vehicle.Vehicle = closestVehicle
-            if GetDistanceBetweenCoords(GetEntityCoords(closestVehicle) + GetEntityForwardVector(closestVehicle), GetEntityCoords(ped), true) > GetDistanceBetweenCoords(GetEntityCoords(closestVehicle) + GetEntityForwardVector(closestVehicle) * -1, GetEntityCoords(ped), true) then
-                Vehicle.IsInFront = false
-            else
-                Vehicle.IsInFront = true
-            end
+            Vehicle.Distance = Distance
+            Vehicle.IsInFront = GetDistanceBetweenCoords(vehicleCoords + vehicleForwardVector, GetEntityCoords(ped), true) > GetDistanceBetweenCoords(vehicleCoords + vehicleForwardVector * -1, GetEntityCoords(ped), true)
         else
-            Vehicle = {Coords = nil, Vehicle = nil, Dimensions = nil, IsInFront = false}
+            Vehicle = {Coords = nil, Vehicle = nil, Dimensions = nil, IsInFront = false, Distance = nil}
         end
-        Citizen.Wait(3000)
+        Citizen.Wait(500)
     end
 end)
 
 
 Citizen.CreateThread(function()
     while true do 
-        Citizen.Wait(3)
+        Citizen.Wait(5)
         local ped = PlayerPedId()
         if Vehicle.Vehicle ~= nil then
  
