@@ -1,7 +1,7 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 Config = {} 
-Config.DamageNeeded = 100.0 -- 100.0 being broken and 1000.0 being fixed a lower value than 100.0 will break it
+Config.DamageNeeded = 900.0 -- 100.0 being broken and 1000.0 being fixed a lower value than 100.0 will break it
 Config.MaxWidth = 5.0 -- Will complete soon
 Config.MaxHeight = 5.0
 Config.MaxLength = 5.0
@@ -14,6 +14,19 @@ local First = vector3(0.0, 0.0, 0.0)
 local Second = vector3(5.0, 5.0, 5.0)
 
 local Vehicle = {Coords = nil, Vehicle = nil, Dimension = nil, IsInFront = false, Distance = nil}
+
+function dump(o)
+    if type(o) == 'table' then
+       local s = '{ '
+       for k,v in pairs(o) do
+          if type(k) ~= 'number' then k = '"'..k..'"' end
+          s = s .. '['..k..'] = ' .. dump(v) .. ','
+       end
+       return s .. '} '
+    else
+       return tostring(o)
+    end
+ end
 
 Citizen.CreateThread(function()
     Citizen.Wait(200)
@@ -28,10 +41,11 @@ Citizen.CreateThread(function()
             Vehicle.Dimensions = dimension
             Vehicle.Vehicle = closestVehicle
             Vehicle.Distance = Distance
-            Vehicle.IsInFront = GetDistanceBetweenCoords(vehicleCoords + vehicleForwardVector, GetEntityCoords(ped), true) > GetDistanceBetweenCoords(vehicleCoords + vehicleForwardVector * -1, GetEntityCoords(ped), true)
+            Vehicle.IsInFront = GetDistanceBetweenCoords(vehicleCoords + vehicleForwardVector, GetEntityCoords(ped), true) < GetDistanceBetweenCoords(vehicleCoords + vehicleForwardVector * -1, GetEntityCoords(ped), true)
         else
             Vehicle = {Coords = nil, Vehicle = nil, Dimensions = nil, IsInFront = false, Distance = nil}
         end
+        -- Citizen.Trace('Distance From Vehicle: ' .. dump(Vehicle) .. '\n')
         Citizen.Wait(500)
     end
 end)
@@ -42,7 +56,7 @@ Citizen.CreateThread(function()
         Citizen.Wait(5)
         local ped = PlayerPedId()
         if Vehicle.Vehicle ~= nil then
- 
+
             if IsVehicleSeatFree(Vehicle.Vehicle, -1) and GetVehicleEngineHealth(Vehicle.Vehicle) <= Config.DamageNeeded then
                 QBCore.Functions.DrawText3D(Vehicle.Coords.x, Vehicle.Coords.y, Vehicle.Coords.z, "Press [~g~SHIFT~w~] and [~g~E~w~] to push the vehicle")
             end
